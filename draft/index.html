@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" ></script>
+</head>
+<body>
+    <div class="app" id="app">
+        <div class="title"></div>
+        <div class="wrapper">
+            <div class="answer-history">
+                <show-item v-for="item in historyList"
+                           v-bind:item="item"
+                           v-bind:key="item.key"
+                >
+                </show-item>
+            </div>
+            <div class="answer">
+                <input v-model="answer">
+                <button v-on:click="judgeAnswer"></button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+      Vue.component('show-item', {
+        props: ['item'],
+        template: '<div>' +
+                    '<p>{{ item.number }}</p>' +
+                    '<p>{{ item.score[0] }}A{{ item.score[1] }}B</p>' +
+                  '</div>'
+      })
+
+      var App = new Vue({
+        el: '#app',
+        data: {
+          historyList: [
+            { key: 0, number: '1234', score: [1, 1] },
+            { key: 1, number: '2456', score: [2, 2] },
+            { key: 2, number: '6432', score: [3, 1] }
+          ],
+          answer: '',
+          result: [ '0' , '2' , '4' , '6' ]
+        },
+        methods: {
+          pushMessage: function(message) {
+            // 之后可以改成全局可调用的消息提示模块
+            if (message === 'formatWrong') {
+              console.log('Input format verification failed !')
+              // alert('输入格式不对嘛，再试试！')
+            }
+            if (message === 'successful') {
+              console.log('-- // Answer Successful! \\ --')
+              // alert('输入格式不对嘛，再试试！')
+            }
+          },
+          addAnswer: function (answer, score) {
+            var item = {
+              key: this.historyList.length,
+              number: answer,
+              score: score
+            }
+            this.historyList.push(item)
+            console.log('answer added')
+          },
+          judgeAnswer: function() {
+            var a = 0, b = 0;
+            var answer = this.answer || ''
+            var result = this.result || []
+            var reg = new RegExp(/^\d*$/)
+            if ((answer.length === 4) && reg.test(answer)) {
+              // 缺少了判断数字是否重复的验证
+              console.log('... Input format verification successful ...')
+              var _answer = answer.split('')
+              _answer.forEach(function(figure, index){
+                if (result.indexOf(figure) > -1) {
+                  if (index === result.indexOf(figure)) {
+                    a++
+                  } else {
+                    b++
+                  }
+                }
+                // hack: if score === 2 then a ++ elseif score ===1 then b ++
+              })
+              console.log([a,b])
+              this.addAnswer(answer, [a, b])
+              if (4 === a) {
+                this.pushMessage('successful')
+              }
+            } else {
+              this.pushMessage('formatWrong')
+            }
+          },
+          initResult: function() {
+            console.log(this.result)
+          }
+        }
+      })
+
+    </script>
+
+
+</body>
+</html>
